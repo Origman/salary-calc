@@ -48,7 +48,7 @@
       border: 1px solid #dce7ed;
       border-radius: 18px;
       padding: 22px;
-      box-shadow: 0 10px 28px rgba(23, 39, 51, 0.06);
+      box-shadow: 0 14px 40px rgba(23, 39, 51, 0.09);
     }
 
     h1 {
@@ -70,19 +70,19 @@
 
     .controls {
       display: grid;
-      gap: 10px;
+      gap: 14px;
     }
 
     .row {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px 14px;
+      gap: 10px 18px;
       align-items: start;
     }
 
     .field {
       display: grid;
-      gap: 5px;
+      gap: 6px;
     }
 
     .field label,
@@ -100,14 +100,14 @@
     }
 
     .field-title {
-      margin-bottom: 4px;
+      margin-bottom: 6px;
       padding: 0;
-      font-weight: 400;
+      font-weight: 500;
     }
 
     .seg {
       display: flex;
-      gap: 6px;
+      gap: 8px;
       flex-wrap: nowrap;
     }
 
@@ -131,25 +131,23 @@
     .seg span {
       display: block;
       border: 1px solid var(--ring);
-      border-radius: 9px;
-      padding: 8px 11px;
-      background: #fbfdfe;
-      color: #38505d;
-      font-size: 0.9rem;
-      font-weight: 400;
+      border-radius: 10px;
+      padding: 9px 12px;
+      background: #f8fbfd;
+      color: #30414b;
       transition: all 170ms ease;
     }
 
     .seg input:focus-visible + span {
       border-color: #7eb89b;
-      box-shadow: 0 0 0 3px rgba(126, 184, 155, 0.2);
+      box-shadow: 0 0 0 4px rgba(126, 184, 155, 0.26);
     }
 
     .seg input:checked + span {
       color: #fff;
       border-color: transparent;
-      background: linear-gradient(135deg, #13845d, #16956a);
-      box-shadow: 0 4px 12px rgba(19, 132, 93, 0.18);
+      background: linear-gradient(135deg, var(--accent), #13865d);
+      box-shadow: 0 6px 16px rgba(12, 122, 82, 0.25);
     }
 
     input[type="text"] {
