@@ -261,17 +261,6 @@
       min-height: 1.45em;
     }
 
-    .currency-note {
-      margin: -2px 0 0;
-      color: #41545f;
-      font-size: 0.88rem;
-      line-height: 1.5;
-      padding: 10px 12px;
-      border-radius: 12px;
-      background: #f6fbf8;
-      border: 1px solid #dce7ed;
-    }
-
     @keyframes rise {
       from {
         transform: translateY(12px);
@@ -340,7 +329,7 @@
           </fieldset>
           <fieldset class="field field-group">
             <legend class="field-title">Валюта</legend>
-            <div class="seg" aria-describedby="currencyNote currencyBehaviorHint">
+            <div class="seg">
               <label>
                 <input type="radio" name="currency" value="RUB" checked />
                 <span>Рубли</span>
@@ -355,28 +344,19 @@
               </label>
             </div>
           </fieldset>
-        </div>
-
-        <p class="currency-note" id="currencyNote">
-          НДФЛ всегда считается в рублях по российской шкале. Выбранная валюта влияет только на ввод суммы
-          и отображение результата.
-        </p>
-
-        <div class="field">
           <fieldset class="field field-group">
-            <legend class="field-title">При смене валюты</legend>
-            <div class="seg" aria-describedby="currencyBehaviorHint">
+            <legend class="field-title">Смена валюты</legend>
+            <div class="seg">
               <label>
                 <input type="radio" name="currencyBehavior" value="convert" checked />
-                <span>Конвертировать сумму</span>
+                <span>Конвертировать</span>
               </label>
               <label>
                 <input type="radio" name="currencyBehavior" value="keep" />
-                <span>Оставить число как есть</span>
+                <span>Оставить число</span>
               </label>
             </div>
           </fieldset>
-          <p class="hint" id="currencyBehaviorHint"></p>
         </div>
 
         <div class="field">
@@ -519,7 +499,6 @@
       taxYear: document.getElementById("taxYear"),
       effectiveRate: document.getElementById("effectiveRate"),
       rateMeta: document.getElementById("rateMeta"),
-      currencyBehaviorHint: document.getElementById("currencyBehaviorHint"),
       rateTableBody: document.getElementById("rateTableBody"),
       monthTableBody: document.getElementById("monthTableBody")
     };
@@ -684,15 +663,6 @@
       if (!fromRate || !toRate) return null;
 
       return (amount * fromRate) / toRate;
-    }
-
-    function describeCurrencyBehavior() {
-      const behavior = selected(el.currencyBehavior) || "convert";
-      if (behavior === "keep") {
-        return "Число в поле не меняется: меняется только валюта, в которой оно трактуется.";
-      }
-
-      return "Введённая сумма автоматически пересчитывается по текущему курсу ЦБ РФ.";
     }
 
     function syncInputToCurrency(nextCurrency) {
@@ -909,7 +879,6 @@
       el.taxYear.textContent = EMPTY_VALUE;
       el.effectiveRate.textContent = EMPTY_VALUE;
       el.rateMeta.textContent = message;
-      el.currencyBehaviorHint.textContent = describeCurrencyBehavior();
       el.rateTableBody.innerHTML = "";
       el.monthTableBody.innerHTML = "";
     }
@@ -946,7 +915,6 @@
       el.taxYear.textContent = formatYear(annualTax, currency);
       el.effectiveRate.textContent = `${effectiveRate.toFixed(2)}%`;
       updateRateMeta();
-      el.currencyBehaviorHint.textContent = describeCurrencyBehavior();
 
       if (mode === "gross") {
         el.salaryLabel.textContent = "Введите гросс-зарплату";
