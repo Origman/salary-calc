@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Калькулятор зарплаты и НДФЛ 2026</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap");
+
+    :root {
+      --bg-1: #f4f7fb;
+      --bg-2: #e9efe6;
+      --card: #ffffff;
+      --ink: #1e2a33;
+      --muted: #5c6b74;
+      --accent: #0c7a52;
+      --ring: #c8d5de;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Rubik", "Trebuchet MS", "Segoe UI Variable", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 10%, #d9f4d6 0%, transparent 40%),
+        radial-gradient(circle at 85% 20%, #ffe2c0 0%, transparent 38%),
+        linear-gradient(145deg, var(--bg-1), var(--bg-2));
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: grid;
+      gap: 16px;
+      animation: rise 450ms ease;
+    }
+
+    .hero,
+    .panel {
+      background: var(--card);
+      border: 1px solid #dce7ed;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 14px 40px rgba(23, 39, 51, 0.09);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.35rem, 3.8vw, 2rem);
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .sub {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      max-width: 78ch;
+    }
+
+    .controls {
+      display: grid;
+      gap: 14px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 0.92rem;
+      color: #41545f;
+    }
+
+    .seg {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .seg label {
+      cursor: pointer;
+    }
+
+    .seg input {
+      display: none;
+    }
+
+    .seg span {
+      display: block;
+      border: 1px solid var(--ring);
+      border-radius: 10px;
+      padding: 9px 12px;
+      background: #f8fbfd;
+      color: #30414b;
+      transition: all 170ms ease;
+    }
+
+    .seg input:checked + span {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--accent), #13865d);
+      box-shadow: 0 6px 16px rgba(12, 122, 82, 0.25);
+    }
+
+    input[type="text"] {
+      font: inherit;
+      font-size: 1.15rem;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--ring);
+      outline: none;
+      background: #fff;
+      transition: border-color 120ms ease, box-shadow 120ms ease;
+    }
+
+    input[type="text"]:focus {
+      border-color: #7eb89b;
+      box-shadow: 0 0 0 4px rgba(126, 184, 155, 0.22);
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+      gap: 10px;
+      margin-top: 2px;
+    }
+
+    .card {
+      border: 1px solid #dce7ed;
+      border-radius: 12px;
+      padding: 14px;
+      background: #fcfefe;
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 0.94rem;
+      color: #47606d;
+      font-weight: 500;
+    }
+
+    .value {
+      margin: 0;
+      font-size: clamp(1rem, 2.8vw, 1.35rem);
+      font-weight: 700;
+    }
+
+    .small {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .section-title {
+      margin: 2px 0 8px;
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid #dce7ed;
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid #edf3f6;
+      font-size: 0.92rem;
+      vertical-align: top;
+    }
+
+    thead th {
+      background: #f6fbf8;
+      color: #35515d;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    .meta a {
+      color: #0b6f99;
+    }
+
+    .rate-meta {
+      margin: 0;
+      color: #35515d;
+      font-size: 0.9rem;
+      line-height: 1.45;
+      min-height: 1.45em;
+    }
+
+    @keyframes rise {
+      from {
+        transform: translateY(12px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 14px;
+      }
+
+      .hero,
+      .panel {
+        padding: 16px;
+      }
+
+      .row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <h1>Калькулятор зарплаты и НДФЛ в России (2026)</h1>
+      <p class="sub">
+        Введите зарплату <strong>гросс</strong> (до налога) или <strong>нет</strong> (на руки), и калькулятор
+        пересчитает обе суммы с учетом прогрессивной шкалы НДФЛ.
+      </p>
+    </section>
+
+    <section class="panel">
+      <div class="controls">
+        <div class="row">
+          <div class="field">
+            <label>Что вводите</label>
+            <div class="seg">
+              <label>
+                <input type="radio" name="mode" value="gross" checked />
+                <span>Гросс (до НДФЛ)</span>
+              </label>
+              <label>
+                <input type="radio" name="mode" value="net" />
+                <span>Нет (на руки)</span>
+              </label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Период</label>
+            <div class="seg">
+              <label>
+                <input type="radio" name="period" value="month" checked />
+                <span>В месяц</span>
+              </label>
+              <label>
+                <input type="radio" name="period" value="year" />
+                <span>В год</span>
+              </label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Валюта</label>
+            <div class="seg">
+              <label>
+                <input type="radio" name="currency" value="RUB" checked />
+                <span>Рубли</span>
+              </label>
+              <label>
+                <input type="radio" name="currency" value="USD" />
+                <span>Доллары</span>
+              </label>
+              <label>
+                <input type="radio" name="currency" value="EUR" />
+                <span>Евро</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="salaryInput" id="salaryLabel">Введите гросс-зарплату</label>
+          <input id="salaryInput" type="text" inputmode="decimal" placeholder="Например: 250000" />
+        </div>
+        <p class="rate-meta" id="rateMeta">Загружаем курс ЦБ РФ...</p>
+      </div>
+
+      <div class="result-grid">
+        <article class="card">
+          <h3>Зарплата гросс</h3>
+          <p class="value" id="grossValue">0 ₽ / мес</p>
+          <p class="small" id="grossYear">0 ₽ / год</p>
+        </article>
+        <article class="card">
+          <h3>Зарплата нет (на руки)</h3>
+          <p class="value" id="netValue">0 ₽ / мес</p>
+          <p class="small" id="netYear">0 ₽ / год</p>
+        </article>
+        <article class="card">
+          <h3>НДФЛ</h3>
+          <p class="value" id="taxValue">0 ₽ / мес</p>
+          <p class="small" id="taxYear">0 ₽ / год</p>
+        </article>
+        <article class="card">
+          <h3>Эффективная ставка НДФЛ</h3>
+          <p class="value" id="effectiveRate">0.00%</p>
+          <p class="small">Средняя ставка по всей сумме дохода</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2 class="section-title">Годовое распределение дохода по ставкам НДФЛ</h2>
+      <p class="hint">Показывает, какая часть дохода за год облагается по каждой ставке.</p>
+      <div class="table-wrap">
+        <table aria-label="Распределение дохода по ставкам НДФЛ">
+          <thead>
+            <tr>
+              <th>Ставка</th>
+              <th>Доход в ставке (за год)</th>
+              <th>Налог в ставке (за год)</th>
+              <th>Доля дохода</th>
+            </tr>
+          </thead>
+          <tbody id="rateTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2 class="section-title">Помесячный расчет НДФЛ и выплаты на руки</h2>
+      <p class="hint">
+        Для помесячной таблицы используется равномерное начисление: годовая сумма делится на 12 одинаковых месяцев.
+      </p>
+      <div class="table-wrap">
+        <table aria-label="Помесячный расчет зарплаты">
+          <thead>
+            <tr>
+              <th>Месяц</th>
+              <th>Гросс</th>
+              <th>Ставка(и) месяца</th>
+              <th>НДФЛ</th>
+              <th>На руки</th>
+              <th>Эфф. ставка месяца</th>
+            </tr>
+          </thead>
+          <tbody id="monthTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <p class="meta">
+        Актуально на <strong>05.03.2026</strong>. Расчет ориентирован на доходы резидента РФ от трудовой деятельности
+        (зарплата/ГПХ) без вычетов, льгот и специальных режимов.
+      </p>
+      <p class="meta">
+        Источники:
+        <a href="https://www.nalog.gov.ru/rn77/news/tax_doc_news/15562179/" target="_blank" rel="noopener noreferrer">ФНС: прогрессивная шкала с 01.01.2025</a>,
+        <a href="https://publication.pravo.gov.ru/document/0001202407120009" target="_blank" rel="noopener noreferrer">ФЗ от 12.07.2024 № 176-ФЗ</a>,
+        <a href="https://www.nalog.gov.ru/new2026/" target="_blank" rel="noopener noreferrer">ФНС: страница «Налоги 2026»</a>.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    const BREAKS = [
+      { from: 0, to: 2_400_000, rate: 0.13 },
+      { from: 2_400_000, to: 5_000_000, rate: 0.15 },
+      { from: 5_000_000, to: 20_000_000, rate: 0.18 },
+      { from: 20_000_000, to: 50_000_000, rate: 0.20 },
+      { from: 50_000_000, to: Number.POSITIVE_INFINITY, rate: 0.22 }
+    ];
+
+    const MONTH_NAMES = [
+      "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+      "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+    ];
+
+    const NET_EDGE_1 = 2_088_000;
+    const NET_EDGE_2 = 4_298_000;
+    const NET_EDGE_3 = 16_598_000;
+    const NET_EDGE_4 = 40_598_000;
+    const SALARY_COOKIE_NAME = "salary_calc_input";
+    const MODE_COOKIE_NAME = "salary_calc_mode";
+    const PERIOD_COOKIE_NAME = "salary_calc_period";
+    const CURRENCY_COOKIE_NAME = "salary_calc_currency";
+    const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
+    const EMPTY_VALUE = "—";
+
+    let currentRates = {
+      RUB: 1,
+      USD: null,
+      EUR: null
+    };
+
+    let ratesMeta = {
+      loading: true,
+      error: "",
+      date: ""
+    };
+
+    let previousCurrency = "RUB";
+
+    const el = {
+      mode: document.querySelectorAll("input[name='mode']"),
+      period: document.querySelectorAll("input[name='period']"),
+      currency: document.querySelectorAll("input[name='currency']"),
+      salaryLabel: document.getElementById("salaryLabel"),
+      salaryInput: document.getElementById("salaryInput"),
+      grossValue: document.getElementById("grossValue"),
+      grossYear: document.getElementById("grossYear"),
+      netValue: document.getElementById("netValue"),
+      netYear: document.getElementById("netYear"),
+      taxValue: document.getElementById("taxValue"),
+      taxYear: document.getElementById("taxYear"),
+      effectiveRate: document.getElementById("effectiveRate"),
+      rateMeta: document.getElementById("rateMeta"),
+      rateTableBody: document.getElementById("rateTableBody"),
+      monthTableBody: document.getElementById("monthTableBody")
+    };
+
+    const currencyFormatters = {};
+
+    function parseNumber(raw) {
+      if (!raw) return 0;
+      const normalized = raw.replace(/\s+/g, "").replace(",", ".").replace(/[^\d.-]/g, "");
+      const value = Number(normalized);
+      if (!Number.isFinite(value)) return 0;
+      return Math.max(0, value);
+    }
+
+    function formatInputNumber(value) {
+      return new Intl.NumberFormat("ru-RU", {
+        useGrouping: true,
+        maximumFractionDigits: 4
+      }).format(value);
+    }
+
+    function countMeaningfulCharacters(value) {
+      return value.replace(/\s+/g, "").length;
+    }
+
+    function getCaretPositionByMeaningfulCount(value, meaningfulCount) {
+      if (meaningfulCount <= 0) return 0;
+
+      let seen = 0;
+      for (let index = 0; index < value.length; index += 1) {
+        if (value[index] !== " ") {
+          seen += 1;
+        }
+
+        if (seen >= meaningfulCount) {
+          return index + 1;
+        }
+      }
+
+      return value.length;
+    }
+
+    function formatEditableInput(rawValue) {
+      const compact = rawValue
+        .replace(/\s+/g, "")
+        .replace(/\./g, ",")
+        .replace(/[^\d,]/g, "");
+
+      if (!compact) return "";
+
+      const hasComma = compact.includes(",");
+      const [rawIntegerPart, ...rest] = compact.split(",");
+      const integerPart = rawIntegerPart.replace(/^0+(?=\d)/, "");
+      const safeIntegerPart = integerPart || (hasComma ? "0" : "");
+      const groupedIntegerPart = safeIntegerPart.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+      const fractionPart = rest.join("").slice(0, 4);
+
+      if (!hasComma) {
+        return groupedIntegerPart;
+      }
+
+      return `${groupedIntegerPart},${fractionPart}`;
+    }
+
+    function formatSalaryInputField() {
+      const rawValue = el.salaryInput.value;
+      const selectionStart = el.salaryInput.selectionStart ?? rawValue.length;
+      const meaningfulBeforeCaret = countMeaningfulCharacters(rawValue.slice(0, selectionStart));
+      const formattedValue = formatEditableInput(rawValue);
+
+      el.salaryInput.value = formattedValue;
+
+      const nextCaretPosition = getCaretPositionByMeaningfulCount(formattedValue, meaningfulBeforeCaret);
+      el.salaryInput.setSelectionRange(nextCaretPosition, nextCaretPosition);
+    }
+
+    function setCookie(name, value, maxAgeSeconds) {
+      document.cookie = `${name}=${encodeURIComponent(value)}; Max-Age=${maxAgeSeconds}; Path=/; SameSite=Lax`;
+    }
+
+    function getCookie(name) {
+      const prefix = `${name}=`;
+      const chunks = document.cookie ? document.cookie.split("; ") : [];
+      for (const chunk of chunks) {
+        if (chunk.startsWith(prefix)) {
+          return decodeURIComponent(chunk.slice(prefix.length));
+        }
+      }
+      return "";
+    }
+
+    function deleteCookie(name) {
+      document.cookie = `${name}=; Max-Age=0; Path=/; SameSite=Lax`;
+    }
+
+    function persistSalaryInput() {
+      const value = el.salaryInput.value.trim();
+      if (value) {
+        setCookie(SALARY_COOKIE_NAME, value, COOKIE_MAX_AGE_SECONDS);
+      } else {
+        deleteCookie(SALARY_COOKIE_NAME);
+      }
+    }
+
+    function restoreSalaryInput() {
+      const savedValue = getCookie(SALARY_COOKIE_NAME);
+      if (savedValue) {
+        el.salaryInput.value = savedValue;
+        formatSalaryInputField();
+      }
+    }
+
+    function persistSelection(nodes, cookieName) {
+      const value = selected(nodes);
+      if (value) {
+        setCookie(cookieName, value, COOKIE_MAX_AGE_SECONDS);
+      } else {
+        deleteCookie(cookieName);
+      }
+    }
+
+    function restoreSelection(nodes, cookieName) {
+      const savedValue = getCookie(cookieName);
+      if (!savedValue) return;
+      for (const node of nodes) {
+        node.checked = node.value === savedValue;
+      }
+    }
+
+    function selected(nodes) {
+      for (const node of nodes) {
+        if (node.checked) return node.value;
+      }
+      return null;
+    }
+
+    function getFormatter(currency) {
+      if (!currencyFormatters[currency]) {
+        currencyFormatters[currency] = new Intl.NumberFormat("ru-RU", {
+          style: "currency",
+          currency,
+          maximumFractionDigits: 2
+        });
+      }
+      return currencyFormatters[currency];
+    }
+
+    function getCurrencyRateToRub(currency) {
+      return currentRates[currency] ?? null;
+    }
+
+    function convertRubToCurrency(amountRub, currency) {
+      const rateToRub = getCurrencyRateToRub(currency);
+      if (!rateToRub) return null;
+      return amountRub / rateToRub;
+    }
+
+    function convertCurrencyAmount(amount, fromCurrency, toCurrency) {
+      const fromRate = getCurrencyRateToRub(fromCurrency);
+      const toRate = getCurrencyRateToRub(toCurrency);
+
+      if (!fromRate || !toRate) return null;
+
+      return (amount * fromRate) / toRate;
+    }
+
+    function syncInputToCurrency(nextCurrency) {
+      const rawValue = el.salaryInput.value.trim();
+      if (!rawValue) {
+        previousCurrency = nextCurrency;
+        return;
+      }
+
+      const amount = parseNumber(rawValue);
+      const converted = convertCurrencyAmount(amount, previousCurrency, nextCurrency);
+
+      if (converted === null) {
+        previousCurrency = nextCurrency;
+        return;
+      }
+
+      el.salaryInput.value = formatInputNumber(converted);
+      formatSalaryInputField();
+      persistSalaryInput();
+      previousCurrency = nextCurrency;
+    }
+
+    function formatMoney(amountRub, currency) {
+      const converted = convertRubToCurrency(amountRub, currency);
+      if (converted === null) return EMPTY_VALUE;
+      return getFormatter(currency).format(converted);
+    }
+
+    function formatMonth(value, currency) {
+      return `${formatMoney(value, currency)} / мес`;
+    }
+
+    function formatYear(value, currency) {
+      return `${formatMoney(value, currency)} / год`;
+    }
+
+    function overlap(aStart, aEnd, bStart, bEnd) {
+      return Math.max(0, Math.min(aEnd, bEnd) - Math.max(aStart, bStart));
+    }
+
+    function annualBreakdown(annualGross) {
+      const rows = [];
+      let annualTax = 0;
+      for (const step of BREAKS) {
+        const incomePart = Math.max(0, Math.min(annualGross, step.to) - step.from);
+        const taxPart = incomePart * step.rate;
+        annualTax += taxPart;
+        rows.push({
+          rate: step.rate,
+          incomePart,
+          taxPart
+        });
+      }
+      return {
+        rows,
+        annualTax,
+        annualNet: Math.max(0, annualGross - annualTax)
+      };
+    }
+
+    function annualGrossFromAnnualNet(annualNet) {
+      if (annualNet <= NET_EDGE_1) return annualNet / 0.87;
+      if (annualNet <= NET_EDGE_2) return (annualNet - 48_000) / 0.85;
+      if (annualNet <= NET_EDGE_3) return (annualNet - 198_000) / 0.82;
+      if (annualNet <= NET_EDGE_4) return (annualNet - 598_000) / 0.8;
+      return (annualNet - 1_598_000) / 0.78;
+    }
+
+    function monthlySchedule(annualGross) {
+      const monthGross = annualGross / 12;
+      const out = [];
+      let cumulativeStart = 0;
+
+      for (let i = 0; i < 12; i += 1) {
+        const start = cumulativeStart;
+        const end = start + monthGross;
+
+        let monthTax = 0;
+        const appliedRates = [];
+
+        if (monthGross > 0) {
+          for (const step of BREAKS) {
+            const piece = overlap(start, end, step.from, step.to);
+            if (piece > 0) {
+              monthTax += piece * step.rate;
+              appliedRates.push(`${(step.rate * 100).toFixed(0)}%`);
+            }
+          }
+        }
+
+        const monthNet = monthGross - monthTax;
+        const effRate = monthGross > 0 ? (monthTax / monthGross) * 100 : 0;
+
+        out.push({
+          monthName: MONTH_NAMES[i],
+          gross: monthGross,
+          ratesText: appliedRates.length ? appliedRates.join(" + ") : "-",
+          tax: monthTax,
+          net: monthNet,
+          effRate
+        });
+
+        cumulativeStart = end;
+      }
+      return out;
+    }
+
+    function updateRateMeta() {
+      if (ratesMeta.loading) {
+        el.rateMeta.textContent = "Загружаем курс ЦБ РФ...";
+        return;
+      }
+
+      if (ratesMeta.error) {
+        el.rateMeta.textContent = ratesMeta.error;
+        return;
+      }
+
+      el.rateMeta.textContent =
+        `Курс ЦБ РФ на ${ratesMeta.date}: 1 USD = ${currentRates.USD.toFixed(4)} RUB, 1 EUR = ${currentRates.EUR.toFixed(4)} RUB.`;
+    }
+
+    async function fetchCurrentRates() {
+      ratesMeta.loading = true;
+      ratesMeta.error = "";
+      updateRateMeta();
+
+      try {
+        const response = await fetch("/api/rates", { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        currentRates = {
+          RUB: 1,
+          USD: data.rates.USD,
+          EUR: data.rates.EUR
+        };
+        ratesMeta = {
+          loading: false,
+          error: "",
+          date: data.date
+        };
+      } catch (error) {
+        ratesMeta = {
+          loading: false,
+          error: "Не удалось загрузить текущий курс ЦБ РФ. Попробуйте обновить страницу.",
+          date: ""
+        };
+      }
+
+      updateRateMeta();
+      render();
+    }
+
+    function renderRateTable(rows, annualGross, currency) {
+      el.rateTableBody.innerHTML = "";
+      for (const row of rows) {
+        const hideZeroTopRateRow =
+          (row.rate === 0.20 || row.rate === 0.22) &&
+          row.incomePart <= 0 &&
+          row.taxPart <= 0;
+
+        if (hideZeroTopRateRow) continue;
+
+        const tr = document.createElement("tr");
+        const share = annualGross > 0 ? (row.incomePart / annualGross) * 100 : 0;
+        tr.innerHTML = `
+          <td>${(row.rate * 100).toFixed(0)}%</td>
+          <td>${formatMoney(row.incomePart, currency)}</td>
+          <td>${formatMoney(row.taxPart, currency)}</td>
+          <td>${share.toFixed(2)}%</td>
+        `;
+        el.rateTableBody.appendChild(tr);
+      }
+    }
+
+    function renderMonthTable(rows, currency) {
+      el.monthTableBody.innerHTML = "";
+      for (const row of rows) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row.monthName}</td>
+          <td>${formatMoney(row.gross, currency)}</td>
+          <td>${row.ratesText}</td>
+          <td>${formatMoney(row.tax, currency)}</td>
+          <td>${formatMoney(row.net, currency)}</td>
+          <td>${row.effRate.toFixed(2)}%</td>
+        `;
+        el.monthTableBody.appendChild(tr);
+      }
+    }
+
+    function renderUnavailableState(message, mode) {
+      if (mode === "gross") {
+        el.salaryLabel.textContent = "Введите гросс-зарплату";
+      } else {
+        el.salaryLabel.textContent = "Введите зарплату на руки (нет)";
+      }
+
+      el.grossValue.textContent = EMPTY_VALUE;
+      el.grossYear.textContent = EMPTY_VALUE;
+      el.netValue.textContent = EMPTY_VALUE;
+      el.netYear.textContent = EMPTY_VALUE;
+      el.taxValue.textContent = EMPTY_VALUE;
+      el.taxYear.textContent = EMPTY_VALUE;
+      el.effectiveRate.textContent = EMPTY_VALUE;
+      el.rateMeta.textContent = message;
+      el.rateTableBody.innerHTML = "";
+      el.monthTableBody.innerHTML = "";
+    }
+
+    function render() {
+      const mode = selected(el.mode);
+      const period = selected(el.period);
+      const currency = selected(el.currency) || "RUB";
+      const currencyRateToRub = getCurrencyRateToRub(currency);
+
+      if (!currencyRateToRub) {
+        renderUnavailableState("Ждем загрузку курса выбранной валюты...", mode);
+        return;
+      }
+
+      const userValue = parseNumber(el.salaryInput.value);
+      const annualInput = period === "month" ? userValue * 12 : userValue;
+      const annualInputRub = annualInput * currencyRateToRub;
+
+      const annualGross = mode === "gross" ? annualInputRub : annualGrossFromAnnualNet(annualInputRub);
+      const { rows, annualTax, annualNet } = annualBreakdown(annualGross);
+      const monthRows = monthlySchedule(annualGross);
+
+      const monthGross = annualGross / 12;
+      const monthTax = annualTax / 12;
+      const monthNet = annualNet / 12;
+      const effectiveRate = annualGross > 0 ? (annualTax / annualGross) * 100 : 0;
+
+      el.grossValue.textContent = formatMonth(monthGross, currency);
+      el.grossYear.textContent = formatYear(annualGross, currency);
+      el.netValue.textContent = formatMonth(monthNet, currency);
+      el.netYear.textContent = formatYear(annualNet, currency);
+      el.taxValue.textContent = formatMonth(monthTax, currency);
+      el.taxYear.textContent = formatYear(annualTax, currency);
+      el.effectiveRate.textContent = `${effectiveRate.toFixed(2)}%`;
+      updateRateMeta();
+
+      if (mode === "gross") {
+        el.salaryLabel.textContent = "Введите гросс-зарплату";
+        el.salaryInput.placeholder = period === "month" ? "Например: 250000" : "Например: 3000000";
+      } else {
+        el.salaryLabel.textContent = "Введите зарплату на руки (нет)";
+        el.salaryInput.placeholder = period === "month" ? "Например: 200000" : "Например: 2400000";
+      }
+
+      renderRateTable(rows, annualGross, currency);
+      renderMonthTable(monthRows, currency);
+    }
+
+    el.salaryInput.addEventListener("input", () => {
+      formatSalaryInputField();
+      persistSalaryInput();
+      render();
+    });
+
+    for (const input of el.mode) {
+      input.addEventListener("change", () => {
+        persistSelection(el.mode, MODE_COOKIE_NAME);
+        render();
+      });
+    }
+
+    for (const input of el.period) {
+      input.addEventListener("change", () => {
+        persistSelection(el.period, PERIOD_COOKIE_NAME);
+        render();
+      });
+    }
+
+    for (const input of el.currency) {
+      input.addEventListener("change", () => {
+        const nextCurrency = selected(el.currency) || "RUB";
+        syncInputToCurrency(nextCurrency);
+        persistSelection(el.currency, CURRENCY_COOKIE_NAME);
+        render();
+      });
+    }
+
+    restoreSelection(el.mode, MODE_COOKIE_NAME);
+    restoreSelection(el.period, PERIOD_COOKIE_NAME);
+    restoreSelection(el.currency, CURRENCY_COOKIE_NAME);
+    previousCurrency = selected(el.currency) || "RUB";
+    restoreSalaryInput();
+    render();
+    fetchCurrentRates();
+  </script>
+</body>
+</html>
+
