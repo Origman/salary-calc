@@ -38,7 +38,7 @@
       max-width: 1080px;
       margin: 0 auto;
       display: grid;
-      gap: 16px;
+      gap: 14px;
       animation: rise 450ms ease;
     }
 
@@ -51,9 +51,14 @@
       box-shadow: 0 14px 40px rgba(23, 39, 51, 0.09);
     }
 
+    .hero {
+      padding: 16px 22px;
+    }
+
     h1 {
-      margin: 0 0 8px;
-      font-size: clamp(1.35rem, 3.8vw, 2rem);
+      margin: 0 0 6px;
+      font-size: clamp(1.2rem, 3.4vw, 1.85rem);
+      line-height: 1.1;
     }
 
     h2 {
@@ -64,7 +69,7 @@
     .sub {
       margin: 0;
       color: var(--muted);
-      line-height: 1.45;
+      line-height: 1.32;
       max-width: 78ch;
     }
 
@@ -282,6 +287,10 @@
       .hero,
       .panel {
         padding: 16px;
+      }
+
+      .hero {
+        padding: 14px 16px;
       }
 
       .row {
