@@ -116,6 +116,11 @@
       flex-wrap: nowrap;
     }
 
+    .seg-stack-mobile,
+    .seg-3-mobile {
+      width: 100%;
+    }
+
     .seg label {
       cursor: pointer;
       display: inline-flex;
@@ -216,6 +221,7 @@
 
     .table-wrap {
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       border: 1px solid #dce7ed;
       border-radius: 12px;
       background: #fff;
@@ -306,6 +312,44 @@
 
       .seg {
         flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .seg label {
+        flex: 1 1 calc(50% - 3px);
+        min-width: 0;
+      }
+
+      .seg-stack-mobile label {
+        flex-basis: 100%;
+      }
+
+      .seg-3-mobile label {
+        flex-basis: calc(33.333% - 4px);
+      }
+
+      .seg span {
+        width: 100%;
+        text-align: center;
+        padding: 10px 8px;
+      }
+
+      .card {
+        padding: 12px;
+      }
+
+      .value {
+        font-size: 1.15rem;
+      }
+
+      table {
+        min-width: 560px;
+      }
+
+      th,
+      td {
+        padding: 8px 10px;
+        font-size: 0.84rem;
       }
     }
   </style>
@@ -325,7 +369,7 @@
         <div class="row">
           <fieldset class="field field-group">
             <legend class="field-title">Что вводите</legend>
-            <div class="seg">
+            <div class="seg seg-stack-mobile">
               <label>
                 <input type="radio" name="mode" value="gross" checked />
                 <span>Гросс (до НДФЛ)</span>
@@ -351,7 +395,7 @@
           </fieldset>
           <fieldset class="field field-group">
             <legend class="field-title">Валюта</legend>
-            <div class="seg">
+            <div class="seg seg-3-mobile">
               <label>
                 <input type="radio" name="currency" value="RUB" checked />
                 <span>Рубли</span>
@@ -368,7 +412,7 @@
           </fieldset>
           <fieldset class="field field-group">
             <legend class="field-title">Смена валюты</legend>
-            <div class="seg">
+            <div class="seg seg-stack-mobile">
               <label>
                 <input type="radio" name="currencyBehavior" value="convert" checked />
                 <span>Конвертировать</span>
