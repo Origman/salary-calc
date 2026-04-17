@@ -84,9 +84,23 @@
       gap: 6px;
     }
 
-    .field label {
+    .field label,
+    .field-title {
       font-size: 0.92rem;
       color: #41545f;
+    }
+
+    .field-group {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      min-width: 0;
+    }
+
+    .field-title {
+      margin-bottom: 6px;
+      padding: 0;
+      font-weight: 500;
     }
 
     .seg {
@@ -97,10 +111,19 @@
 
     .seg label {
       cursor: pointer;
+      display: inline-flex;
     }
 
     .seg input {
-      display: none;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     .seg span {
@@ -111,6 +134,11 @@
       background: #f8fbfd;
       color: #30414b;
       transition: all 170ms ease;
+    }
+
+    .seg input:focus-visible + span {
+      border-color: #7eb89b;
+      box-shadow: 0 0 0 4px rgba(126, 184, 155, 0.26);
     }
 
     .seg input:checked + span {
@@ -233,6 +261,17 @@
       min-height: 1.45em;
     }
 
+    .currency-note {
+      margin: -2px 0 0;
+      color: #41545f;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #f6fbf8;
+      border: 1px solid #dce7ed;
+    }
+
     @keyframes rise {
       from {
         transform: translateY(12px);
@@ -265,7 +304,7 @@
     <section class="hero">
       <h1>Калькулятор зарплаты и НДФЛ в России (2026)</h1>
       <p class="sub">
-        Введите зарплату <strong>гросс</strong> (до налога) или <strong>нет</strong> (на руки), и калькулятор
+        Введите зарплату <strong>гросс</strong> (до налога) или <strong>нетто</strong> (на руки), и калькулятор
         пересчитает обе суммы с учетом прогрессивной шкалы НДФЛ.
       </p>
     </section>
@@ -273,8 +312,8 @@
     <section class="panel">
       <div class="controls">
         <div class="row">
-          <div class="field">
-            <label>Что вводите</label>
+          <fieldset class="field field-group">
+            <legend class="field-title">Что вводите</legend>
             <div class="seg">
               <label>
                 <input type="radio" name="mode" value="gross" checked />
@@ -282,12 +321,12 @@
               </label>
               <label>
                 <input type="radio" name="mode" value="net" />
-                <span>Нет (на руки)</span>
+                <span>Нетто (на руки)</span>
               </label>
             </div>
-          </div>
-          <div class="field">
-            <label>Период</label>
+          </fieldset>
+          <fieldset class="field field-group">
+            <legend class="field-title">Период</legend>
             <div class="seg">
               <label>
                 <input type="radio" name="period" value="month" checked />
@@ -298,10 +337,10 @@
                 <span>В год</span>
               </label>
             </div>
-          </div>
-          <div class="field">
-            <label>Валюта</label>
-            <div class="seg">
+          </fieldset>
+          <fieldset class="field field-group">
+            <legend class="field-title">Валюта</legend>
+            <div class="seg" aria-describedby="currencyNote currencyBehaviorHint">
               <label>
                 <input type="radio" name="currency" value="RUB" checked />
                 <span>Рубли</span>
@@ -315,7 +354,29 @@
                 <span>Евро</span>
               </label>
             </div>
-          </div>
+          </fieldset>
+        </div>
+
+        <p class="currency-note" id="currencyNote">
+          НДФЛ всегда считается в рублях по российской шкале. Выбранная валюта влияет только на ввод суммы
+          и отображение результата.
+        </p>
+
+        <div class="field">
+          <fieldset class="field field-group">
+            <legend class="field-title">При смене валюты</legend>
+            <div class="seg" aria-describedby="currencyBehaviorHint">
+              <label>
+                <input type="radio" name="currencyBehavior" value="convert" checked />
+                <span>Конвертировать сумму</span>
+              </label>
+              <label>
+                <input type="radio" name="currencyBehavior" value="keep" />
+                <span>Оставить число как есть</span>
+              </label>
+            </div>
+          </fieldset>
+          <p class="hint" id="currencyBehaviorHint"></p>
         </div>
 
         <div class="field">
@@ -425,6 +486,7 @@
     const MODE_COOKIE_NAME = "salary_calc_mode";
     const PERIOD_COOKIE_NAME = "salary_calc_period";
     const CURRENCY_COOKIE_NAME = "salary_calc_currency";
+    const CURRENCY_BEHAVIOR_COOKIE_NAME = "salary_calc_currency_behavior";
     const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
     const EMPTY_VALUE = "—";
 
@@ -446,6 +508,7 @@
       mode: document.querySelectorAll("input[name='mode']"),
       period: document.querySelectorAll("input[name='period']"),
       currency: document.querySelectorAll("input[name='currency']"),
+      currencyBehavior: document.querySelectorAll("input[name='currencyBehavior']"),
       salaryLabel: document.getElementById("salaryLabel"),
       salaryInput: document.getElementById("salaryInput"),
       grossValue: document.getElementById("grossValue"),
@@ -456,6 +519,7 @@
       taxYear: document.getElementById("taxYear"),
       effectiveRate: document.getElementById("effectiveRate"),
       rateMeta: document.getElementById("rateMeta"),
+      currencyBehaviorHint: document.getElementById("currencyBehaviorHint"),
       rateTableBody: document.getElementById("rateTableBody"),
       monthTableBody: document.getElementById("monthTableBody")
     };
@@ -622,9 +686,24 @@
       return (amount * fromRate) / toRate;
     }
 
+    function describeCurrencyBehavior() {
+      const behavior = selected(el.currencyBehavior) || "convert";
+      if (behavior === "keep") {
+        return "Число в поле не меняется: меняется только валюта, в которой оно трактуется.";
+      }
+
+      return "Введённая сумма автоматически пересчитывается по текущему курсу ЦБ РФ.";
+    }
+
     function syncInputToCurrency(nextCurrency) {
       const rawValue = el.salaryInput.value.trim();
       if (!rawValue) {
+        previousCurrency = nextCurrency;
+        return;
+      }
+
+      const currencyBehavior = selected(el.currencyBehavior) || "convert";
+      if (currencyBehavior === "keep") {
         previousCurrency = nextCurrency;
         return;
       }
@@ -819,7 +898,7 @@
       if (mode === "gross") {
         el.salaryLabel.textContent = "Введите гросс-зарплату";
       } else {
-        el.salaryLabel.textContent = "Введите зарплату на руки (нет)";
+        el.salaryLabel.textContent = "Введите зарплату на руки (нетто)";
       }
 
       el.grossValue.textContent = EMPTY_VALUE;
@@ -830,6 +909,7 @@
       el.taxYear.textContent = EMPTY_VALUE;
       el.effectiveRate.textContent = EMPTY_VALUE;
       el.rateMeta.textContent = message;
+      el.currencyBehaviorHint.textContent = describeCurrencyBehavior();
       el.rateTableBody.innerHTML = "";
       el.monthTableBody.innerHTML = "";
     }
@@ -866,12 +946,13 @@
       el.taxYear.textContent = formatYear(annualTax, currency);
       el.effectiveRate.textContent = `${effectiveRate.toFixed(2)}%`;
       updateRateMeta();
+      el.currencyBehaviorHint.textContent = describeCurrencyBehavior();
 
       if (mode === "gross") {
         el.salaryLabel.textContent = "Введите гросс-зарплату";
         el.salaryInput.placeholder = period === "month" ? "Например: 250000" : "Например: 3000000";
       } else {
-        el.salaryLabel.textContent = "Введите зарплату на руки (нет)";
+        el.salaryLabel.textContent = "Введите зарплату на руки (нетто)";
         el.salaryInput.placeholder = period === "month" ? "Например: 200000" : "Например: 2400000";
       }
 
@@ -908,9 +989,17 @@
       });
     }
 
+    for (const input of el.currencyBehavior) {
+      input.addEventListener("change", () => {
+        persistSelection(el.currencyBehavior, CURRENCY_BEHAVIOR_COOKIE_NAME);
+        render();
+      });
+    }
+
     restoreSelection(el.mode, MODE_COOKIE_NAME);
     restoreSelection(el.period, PERIOD_COOKIE_NAME);
     restoreSelection(el.currency, CURRENCY_COOKIE_NAME);
+    restoreSelection(el.currencyBehavior, CURRENCY_BEHAVIOR_COOKIE_NAME);
     previousCurrency = selected(el.currency) || "RUB";
     restoreSalaryInput();
     render();
